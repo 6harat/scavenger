@@ -1,0 +1,2 @@
+class Persistor:
+	pass
