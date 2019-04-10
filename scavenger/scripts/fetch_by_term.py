@@ -1,4 +1,4 @@
-from scavenger.adapter import PlayFetch
+from playmate import PlayMate
 from scavenger.helper import initialize
 import asyncio
 import json
@@ -7,13 +7,35 @@ import math
 
 initialize()
 
+EMAIL_FILE_PATH		= '../../static/emails.txt'
+DEV_IDS_FILE_PATH	= '../../static/devs.txt'
+DICT_WORD_FILE_PATH	= '../../static/words_alpha.txt'
+OPT_FILE_PATH		= '../../opt/app_info_{suffix}.json'
+
+
 def load_emails():
-	with open('../email.txt') as f:
-		return { l.strip() for l in f.readlines() }
+	try:
+		with open(EMAIL_FILE_PATH) as fe:
+			return { l.strip() for l in fe.readlines() }
+	except:
+		log.exception('failed to load past emails')
+		return set()
 
 def load_dev_ids():
-	with open('../dev.txt') as fd:
-		return { l.strip() for l in fd.readlines() }
+	try:
+		with open(DEV_IDS_FILE_PATH) as fd:
+			return { l.strip() for l in fd.readlines() }
+	except:
+		log.exception('failed to load past developer ids')
+		return set()
+
+def load_dict_words():
+	try:
+		with open(DICT_WORD_FILE_PATH) as fw:
+			return [ e.strip() for e in fw.readlines()]
+	except:
+		log.exception('failed to load dict words')
+		return []
 
 old_emails_set = load_emails()
 old_emails = list(old_emails_set)
@@ -29,7 +51,7 @@ async def process_app(r):
 	log.info('processing dev_id: {}'.format(dev_id))
 	if dev_id not in old_dev_ids_set and dev_id not in discarded and dev_id not in info_map:
 		app_id = r.get('app_id')
-		async with PlayFetch() as detail_fetcher:
+		async with PlayMate() as detail_fetcher:
 			try:
 				detail = await detail_fetcher.get_app_details(app_id)
 			except:
@@ -51,7 +73,7 @@ async def process_app(r):
 def dump_data(idx):
 	log.info('data dump started')
 	try:
-		with open('../dev_info.{}.json'.format(idx), 'w') as wf:
+		with open(OPT_FILE_PATH.format(suffix=idx), 'w') as wf:
 			json.dump(info_map, wf)
 	except:
 		log.info('data dump failed')
@@ -69,36 +91,27 @@ async def search_by_term(fetcher, term):
 
 async def main(terms, idx):
 	log.info('started process for idx: {}'.format(idx))
-	async with PlayFetch() as fetcher:
+	async with PlayMate() as fetcher:
 		await asyncio.gather(*[ search_by_term(fetcher, term) for term in terms ])
 	dump_data(idx)
 
 loop = asyncio.get_event_loop()
-go = lambda idx, count=10000: loop.run_until_complete(main(
-	old_emails[idx*count:(idx+1)*count],
-	idx
-))
-goc = lambda: loop.run_until_complete(main(
+
+gochar = lambda: loop.run_until_complete(main(
 	'abcdefghijklmnopqrstuvwxyz',
-	2
+	'char'
 ))
-def gow():
-	try:
-		with open('../words_alpha.txt') as wf:
-			words = [ e.strip() for e in wf.readlines()]
-	except:
-		log.error('failed to load words')
-	else:
-		len_words = len(words)
-		log.info('loaded words: {}'.format(len_words))
-		chunk_size = 1000
-		num_chunks = math.ceil(len_words/chunk_size)
-		log.info('initiating search, chunk_size: {} num_chunks: {}'.format(
-			chunk_size, num_chunks
+def goword():
+	words = load_dict_words()
+	len_words = len(words)
+	log.info('loaded words: {}'.format(len_words))
+	chunk_size = 1000
+	num_chunks = math.ceil(len_words/chunk_size)
+	log.info('initiating search, chunk_size: {} num_chunks: {}'.format(
+		chunk_size, num_chunks
+	))
+	for i in range(num_chunks):
+		loop.run_until_complete(main(
+			words[i*chunk_size: (i+1)*chunk_size],
+			'word_{}'.format(i)
 		))
-		for i in range(num_chunks):
-			loop.run_until_complete(main(
-				words[i*chunk_size: (i+1)*chunk_size],
-				'words_{}'.format(i)
-			))
-	

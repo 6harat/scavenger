@@ -1,21 +1,14 @@
-from datetime import datetime
-from scavenger.adapter import PlayFetch
-from scavenger.definitions.error import DomainError as err
-from scavenger.definitions.flusher import Flusher
-from scavenger.definitions.manager import Manager_
-from scavenger.definitions.store import Store
-from typing import Type
+from scavenger.core.definitions import Processor_, Status
+from scavenger.core import Flusher
 
-import logging as log
 
-class BaseManager_(Manager_):
+class Explorer(Processor_):
 
-	def __init__(self, uid, process_mode: Type[Manager_.ProcessMode],
-		flusher: Type[Flusher], persist_mode: Type[Manager_.PersistMode]):
+	def __init__(self, uid, flusher: Flusher):
 		self.__uid__ = uid
 		self.__started_at__ = datetime.now()
 		self.__stopped_at__ = None
-		self.__status__ = self.__class__.Status.INITIATING
+		self.__status__ = Status.INITIATING
 		self.__process_mode__ = process_mode
 		self.__store__ = Store()
 		self.__flusher__ = flusher
@@ -24,7 +17,7 @@ class BaseManager_(Manager_):
 		self.__subscriptions__ = None
 		self.__tasks__ = None
 		self.__post_init__()
-	
+
 	@property
 	def uid(self):
 		return self.__uid__
@@ -41,7 +34,7 @@ class BaseManager_(Manager_):
 		self.__subscriptions__ = (
 			self.__store__.subscribe(self.__flusher__),
 			self.__flusher__.subscribe(self.__persistor__)
-		)			
+		)
 
 	# concrete async methods
 	async def activate(self):
@@ -67,7 +60,7 @@ class BaseManager_(Manager_):
 	async def __shutdown__(self,  forced=False):
 		if forced: self.__status__ = self.__class__.Status.TERMINATING
 		else: self.__status__ = self.__class__.Status.SHUTTING
-		
+
 		self.__fetcher__.force_close()
 		self.
 
@@ -75,13 +68,11 @@ class BaseManager_(Manager_):
 	def is_pending(self):
 		return self.status in [
 			self.__class__.Status.INITIATING,
-			self.__class__.Status.INITIATED,
 			self.__class__.Status.RUNNING,
-			self.__class__.Status.FLUSHING,
 			self.__class__.Status.SHUTTING,
 			self.__class__.Status.TERMINATING
 		]
-	
+
 	def is_finished(self):
 		return self.status in [
 			self.__class__.Status.FAILED,
@@ -90,5 +81,4 @@ class BaseManager_(Manager_):
 		]
 
 	def __create_task__(self, coro, shield=False):
-		return 
-	
+		return

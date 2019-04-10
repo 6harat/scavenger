@@ -1,15 +1,17 @@
 from aiohttp import web
-from scavenger.controllers import core, managed
+from scavenger.api import apps, scraper
 
 routes = [
-	# core services
-	web.get('/detail', core.detail),
-	web.get('/apps', core.apps),
-	web.get('/similar', core.similar),
-	web.get('/search', core.search),
+	# apps services
+	web.get('/apps', apps.apps),
+	web.get('/apps/{app_id}/detail', apps.detail),
+	web.get('/apps/{app_id}/similar', apps.similar),
 
-	# managed services
-	web.get('/manager/peek', managed.peek_all),
-	web.get('/manager/{pid}/peek', managed.peek),
-	web.post('/manager', managed.execute)
+	# scraper services
+	web.post('/scraper/{pid}', scraper.flush),
+	web.get('/scraper/{pid}', scraper.peek),
+	web.get('/scraper', scraper.peek_all),
+	web.post('/scraper', scraper.start),
+	web.delete('/scraper/{pid}', scraper.stop),
+	web.patch('/scraper/{pid}', scraper.update),
 ]

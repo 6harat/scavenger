@@ -1,28 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from rx.subjects import Subject
-from typing import List, Type
-
+from scavenger.api.definitions import invariants
 import logging as log
 
 class Flusher(Subject):
 
-	@dataclass(frozen=True)
-	class Mode:
-		num_records		:int
-		duration		:Type[timedelta]
-
-		def __post__init__(self):
-			if self.num_records is not None and self.num_records < 0:
-				raise ValueError('num_records should be a non-negative integer')
-			if self.duration is not None and not isinstance(self.duration, timedelta):
-				raise ValueError('duration should be a valid datetime.timedelta')
-
-		def should_flush(self, curr_records, curr_duration):
-			return (self.num_records is not None and curr_records >= self.num_records) or (
-					self.duration is not None and curr_duration >= self.duration)
-
-	def __init__(self, flush_mode:Type[Mode]):
+	def __init__(self, flush_mode:invariants.FlushMode.Params):
 		self.__flush_mode__ = flush_mode
 		self.__container__ = []
 		self.__num_records__ = 0
@@ -42,7 +26,6 @@ class Flusher(Subject):
 		self.__container__.append(value)
 		self.__num_records__ += 1
 		self.purge()
-
 	
 	def on_error(self, err):
 		pass

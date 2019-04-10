@@ -6,8 +6,8 @@ with open('README.md', 'r') as fh:
 setuptools.setup(
     name='scavenger',
     version='0.0.1',
-    author='gults',
-    author_email='bh.gulats@gmail.com',
+    author='Gulats',
+    author_email='bharat.gulati.certi@gmail.com',
     description='a google play store scavenger',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -20,7 +20,7 @@ setuptools.setup(
         'cchardet',
         'dataclasses-json',
         'motor',
-        'play-scraper',
+        'playmate',
         'pydash'
     ],
     classifiers=[

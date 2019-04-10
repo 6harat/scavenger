@@ -5,7 +5,10 @@
 * quickstart:
 
 * todo:
+- [ ] add proper types to atleast all public apis
+- [ ] use generics as necesssary to improve public apis
 - [ ] use exception parser rather than duplicating validation logic in adapter and controller
+- [ ] convert all errors in playmate and internal to domain_error
 - [ ] configure setup to enable type checking during compilation
 - [ ] make static functions cached
 - [ ] add proper validations at all places

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from scavenger.definitions.manager import Manager_
 from typing import Any
 
 @dataclass
@@ -21,10 +20,6 @@ class Proxy:
 	def __hash__(self):
 		return hash(self._obj)
 
-class ProxyManager(Proxy, Manager_):
-	pass
-
 __all__ = [
-	'Proxy',
-	'ProxyManager'
+	'Proxy'
 ]

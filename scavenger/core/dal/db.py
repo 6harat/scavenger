@@ -11,21 +11,21 @@ import motor.motor_asyncio
 
 class Transformer:
 	@classmethod
-	def to_db(cls, value):
+	def to_do(cls, value):
 		if isinstance(value, dict):
 			value['_id'] = value.pop('app_id')
 			return value
 		if isinstance(value, Iterable):
-			return [ cls.to_db(v) for v in value ]
+			return [ cls.to_do(v) for v in value ]
 		return value
 	
 	@classmethod
-	def from_db(cls, value):
+	def from_do(cls, value):
 		if isinstance(value, dict):
 			value['app_id'] = value.pop('_id')
 			return value
 		if isinstance(value, Iterable):
-			return [ cls.from_db(v) for v in value ]
+			return [ cls.from_do(v) for v in value ]
 		return value
 
 class Persistor(Observer):

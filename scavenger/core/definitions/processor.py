@@ -1,42 +1,10 @@
-from dataclasses import dataclass
-from enum import auto, Enum, unique
-from scavenger.data_sources import DbPersistor, FilePersistor
-from scavenger.definitions.mixins import EnumParserMixin
-from typing import Type
+from scavenger.core.definitions import Proxy
 
 import abc
 import functools
 
-class Manager_:
-	# enums
-	@unique
-	class Action(EnumParserMixin, Enum):
-		START		= auto()
-		STOP		= auto()
-		FLUSH		= auto()
+class Processor_:
 
-	@unique
-	class ProcessMode(EnumParserMixin, Enum):
-		DETAIL		= auto()
-		CRAWL		= auto()
-
-	@unique
-	class PersistMode(EnumParserMixin, Enum):
-		DB			= functools.partial(DbPersistor)
-		FILE		= functools.partial(FilePersistor)
-	
-	@unique
-	class Status(EnumParserMixin, Enum):
-		INITIATING	= auto()
-		INITIATED	= auto()
-		RUNNING		= auto()
-		FLUSHING	= auto()
-		SHUTTING	= auto()
-		TERMINATING	= auto()
-		FAILED		= auto()
-		TERMINATED	= auto()
-		COMPLETED	= auto()
-		
 	# async methods
 	@abc.abstractmethod
 	async def activate(self):
@@ -81,6 +49,10 @@ class Manager_:
 	def __create_task__(self, coro, shield=False):
 		raise NotImplementedError
 	
+class ProcessorProxy(Proxy, Processor_):
+	pass
+
 __all__ = [
-	'Manager_'
+	'Processor_',
+	'ProcessorProxy'
 ]

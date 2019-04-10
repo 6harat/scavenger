@@ -24,3 +24,7 @@ class Store(Subject):
 
 	def on_completed(self):
 		return super().on_completed()
+
+__all__ = [
+	'Store'
+]
