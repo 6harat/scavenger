@@ -12,6 +12,9 @@ class Store(Subject):
 	def num_records(self):
 		return self.__num_records__
 
+	def is_key_unique(self, key):
+		return key not in self.__bucket__
+
 	def on_next(self, key, value):
 		if key not in self.__bucket__:
 			self.__bucket__.add(key)

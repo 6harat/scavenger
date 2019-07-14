@@ -1,7 +1,6 @@
 from aiohttp import web
 from enum import auto, Enum, unique
 from dataclasses import dataclass, field
-from dataclasses_json import dataclass_json
 from http import HTTPStatus
 from scavenger.api import util
 from scavenger.api.definitions import mixins
@@ -15,37 +14,39 @@ class Location(mixins.EnumParser, Enum):
 
 @unique
 class Issue(mixins.EnumParser, Enum):
-	INVALID_PARAMETER_VALUE		= (1, lambda expected=None: 'valid values: {}'.format(
-		'non-empty string' if util.is_empty(expected) else expected
-	))
-	ARGS_NOT_SUPPORTED			= (2, lambda scenario=None: 'supported only when: {}'.format(
+	ARGS_NOT_SUPPORTED			= (1, lambda scenario=None: 'supported only when: {}'.format(
 		'' if util.is_empty(scenario) else scenario
 	))
+	INVALID_PARAMETER_VALUE		= (2, lambda expected=None: 'valid values: {}'.format(
+		'non-empty string' if util.is_empty(expected) else expected
+	))
+	NOT_FOUND					= (3, lambda : 'requested resource not found')
 
 	def __description__(self):
 		#pylint: disable=unsubscriptable-object
 		return self.value[1]
 
-@dataclass_json
 @dataclass(frozen=True)
 class Detail:
-	issue		:Issue
+	issue		:str
 	description	:str
-	field		:str		= None
-	location	:Location	= None
+	field		:str	= None
+	location	:str	= None
 
 	def __post_init__(self):
 		if self.field is not None and self.location is None:
-			object.__setattr__(self, 'location', Location.QUERY)
+			object.__setattr__(self, 'location', Location.QUERY.value)
 	
 	@classmethod
 	def build(cls, issue: Union[str, Issue], field:str=None, location:Location=None, **desc_args) -> 'Detail':
 		parsed_issue = Issue.parse(issue)
+		parsed_location = Location.parse(location)
 		if parsed_issue is None:
 			raise ValueError('not a valid Issue: {}'.format(issue))
-		return cls(issue, issue.__description__()(**desc_args), field, location)
+		if location is not None and parsed_location is None:
+			raise ValueError('not a valid Location: {}'.format(location))
+		return cls(issue.name, issue.__description__()(**desc_args), field, location.value if location else None)
 
-@dataclass_json
 @dataclass(frozen=True)
 class ApiError(Exception):
 	status	:Union[int, HTTPStatus]
@@ -60,7 +61,7 @@ class ApiError(Exception):
 	# utility functions
 	def to_web_response(self):
 		return web.json_response(
-			self.details,
+			tuple(map(lambda d: d.__dict__, self.details)),
 			status=self.status.value
 		)
 

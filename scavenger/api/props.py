@@ -17,7 +17,7 @@ class limits:
                 return self.comparator.le(self.minimum, value) and self.comparator.le(value, self.maximum)
             return self.minimum <= value <= self.maximum
         def __repr__(self):
-            return 'limit[{}, {}]'.format(self.minimum, self.maximum)
+            return 'range[{}, {}]'.format(self.minimum, self.maximum)
 
 @util.staticclass
 class apps:

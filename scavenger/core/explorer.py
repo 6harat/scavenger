@@ -12,7 +12,7 @@ class Explorer(Processor_):
 		self.__process_mode__ = process_mode
 		self.__store__ = Store()
 		self.__flusher__ = flusher
-		self.__persistor__ = persist_mode()
+		self.__persistor__ = 
 		self.__fetcher__ = None
 		self.__subscriptions__ = None
 		self.__tasks__ = None
@@ -42,7 +42,7 @@ class Explorer(Processor_):
 			raise err.ManagerAlreadyActivated
 		async with PlayFetch(persist=True) as fetcher:
 			self.__fetcher__ = fetcher
-			self.__register_subscriptions__()
+			self.__register_subscriptions__tas()
 			await self.__execute__()
 
 	async def flush(self):

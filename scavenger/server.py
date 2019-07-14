@@ -1,6 +1,7 @@
 from aiohttp import web
 from pydash import pick
 from scavenger.helper import constants, initialize
+from scavenger.middleware import auth_middleware, error_middleware
 from scavenger.routes import routes
 
 import asyncio
@@ -15,7 +16,10 @@ async def on_shutdown(app):
 
 if __name__ == '__main__':
 	initialize()
-	app = web.Application()
+	app = web.Application(middlewares=[
+		error_middleware,
+		auth_middleware
+	])
 	app.on_startup.append(on_startup)
 	app.on_shutdown.append(on_shutdown)
 	app.add_routes(routes)
